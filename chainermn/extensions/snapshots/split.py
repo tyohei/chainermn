@@ -3,20 +3,17 @@ import collections
 from pympler import asizeof
 
 from chainermn.extensions.snapshots import util
-from chainermn.extensions.snapshots import thread
-from chainermn.extensions.snapshots import writers
+
+"""THIS FILE IS NOT COMPLETED!
+"""
 
 
-# ONLY AVAILABLE AT NPZ FORMAt
-class MNSplitThreadWriter(writers.ThreadWriter):
+def split(comm):
 
-    def __init__(self, comm, participants):
-        self._comm = comm
-        self._participants = participants
-
-    def write(self, filename, outdir, handler):
+    def split(filename, outdir, handler):
         target = handler.target
-        root = self._participants[0]
+        participants = [x for x in range(0, comm.size)]
+        root = participants[0]
         memsizes = {}
         pattern = 'updater/'
         # items() is defined in both npz and hdf5 format.
@@ -36,5 +33,5 @@ class MNSplitThreadWriter(writers.ThreadWriter):
 
         # Overwrite original target
         target = local_target
-
-        super(MNSplitThreadWriter, self).__call__(filename, outdir, handler)
+        filename = filename + '_{}'.format()
+        util.snapshot(filename, outdir, handler)
