@@ -9,44 +9,63 @@ class Writer(object):
     def __init__(self):
         pass
 
+    def initialize(self, snapshot, trainer):
+        pass
+
     def write(self, filename, outdir, handler):
+        pass
+
+    def finalize(self):
         pass
 
 
 class SimpleWriter(Writer):
 
+    def __init__(self, func=util.snapshot):
+        self._func = func
+
     def write(self, filename, outdir, handler):
-        util.snapshot(filename, outdir, handler.save)
+        self._func(filename, outdir, handler)
 
 
 class ThreadWriter(Writer):
 
+    def __init__(self, func=util.snapshot):
+        self._func = func
+
     def write(self, filename, outdir, handler):
-        thread = threading.Thread(target=util.snapshot,
-                                  args=(filename, outdir, handler.save))
+        thread = threading.Thread(target=self._func,
+                                  args=(filename, outdir, handler))
         thread.start()
 
 
 class ProcessWriter(Writer):
 
+    def __init__(self, func=util.snapshot):
+        self._func = func
+
     def write(self, filename, outdir, handler):
-        process = multiprocessing.Process(target=util.snapshot,
-                                          args=(filename, outdir, handler.save))
+        process = multiprocessing.Process(target=self._func,
+                                          args=(filename, outdir, handler))
         process.start()
 
 
 class QueueThreadWriter(Writer):
     
+    def __init__(self, func=util.snapshot_consumer, task=util.SnapshotTask):
+        self._func = func
+        self._task = task
+
     def initialize(self, snapshot, trainer):
         self._queue = queue.Queue()
-        self._consumer = threading.Thread(target=util.snapshot_consumer,
+        self._consumer = threading.Thread(target=self._func,
                                           args=(self._queue,))
         self._consumer.start()
 
     def write(self, filename, outdir, handler):
-        self._queue.put(util.SnapshotTask(filename, outdir, handler.save))
+        self._queue.put(self._task(filename, outdir, handler))
 
-    def finalize(self, snapshot):
+    def finalize(self):
         self._queue.put(None)
         self._queue.join()
         self._consumer.join()
@@ -54,16 +73,20 @@ class QueueThreadWriter(Writer):
 
 class QueueProcessWriter(Writer):
     
+    def __init__(self, func=util.snapshot_consumer, task=util.SnapshotTask):
+        self._func = func
+        self._task = task
+
     def initialize(self, snapshot, trainer):
         self._queue = multiprocessing.JoinableQueue()
-        self._consumer = multiprocessing.Process(target=util.snapshot_consumer,
+        self._consumer = multiprocessing.Process(target=self._func,
                                                  args=(self._queue,))
         self._consumer.start()
 
     def write(self, filename, outdir, handler):
-        self._queue.put(util.SnapshotTask(filename, outdir, handler.save))
+        self._queue.put(self._task(filename, outdir, handler))
 
-    def finalize(self, snapshot):
+    def finalize(self):
         self._queue.put(None)
         self._queue.join()
         self._consumer.join()
