@@ -36,7 +36,6 @@ class HDF5SerializerHandler(SerializerHandler):
         self.group = h5py.File(tmppath)
         self.serializer = hdf5.HDF5Serializer(self.group, compression=compression)
         self.serializer.save(target)
-        # Need to implement self.target
 
     def save(self, filename=None):
         if filename is not None:
