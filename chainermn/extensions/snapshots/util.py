@@ -37,7 +37,6 @@ class SnapshotTask(object):
         self._filename = filename
         self._outdir = outdir
         self._handler = handler
-        super(SnapshotTask, self).__init__()
 
     def __call__(self):
         snapshot(self._filename, self._outdir, self._handler)
