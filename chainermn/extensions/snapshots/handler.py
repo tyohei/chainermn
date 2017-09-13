@@ -6,6 +6,12 @@ from chainer.serializers import npz
 from chainer.serializers import hdf5
 
 class SerializerHandler(object):
+    """Base class of handler of serializers.
+    
+    To divide the serialize function and the actual save function
+    provided by :func:`save_npz` and :func:`save_hdf5`, this class provides
+    :func:`serialize` method and :func:`save` method.
+    """
 
     def serialize(self, target):
         raise NotImplementedError

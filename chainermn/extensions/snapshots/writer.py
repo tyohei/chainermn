@@ -5,11 +5,21 @@ import queue
 from chainermn.extensions.snapshots import util
 
 class Writer(object):
+    """Base class of snapshot writer.
+
+    :class:`Snapshot` invokes this :class:`Writer` object's 
+    :func:`write` everytime if this process is in charge to taking a snapshot.
+    Writer only needs a method named :func:`write` which takes three
+    arguments: already formated file name (str), path name to the output
+    directory (str), and the serializer handler.
+    """
 
     def __init__(self):
         pass
 
     def write(self, filename, outdir, handler):
+        """Invokes the actual snapshot function.
+        """
         pass
 
     def finalize(self):

@@ -4,6 +4,21 @@ from chainermn.extensions.snapshots import writer as writer_module
 from chainermn.extensions.snapshots import condition as condition_module
 
 class Snapshot(extension.Extension):
+    """Takes a snapshot.
+
+    Args:
+        target: Object to serialize. If not specified, it will
+            be trainer object.
+        comm: ChainerMN communicator. It is only used for adding a rank
+            to the snapshot filename.
+        condition: Callable object. It need to return boolean in its call.
+            It takes two arguments: the trainer object and this snapshot
+            extension object. If its return True the snapshot will be
+            done. If not it will be skipped.
+        writer: Writer object.
+        filename (str): Name of the file into which the object is serialized.
+
+    """
 
     def __init__(self,
                  target=None,
@@ -11,9 +26,7 @@ class Snapshot(extension.Extension):
                  condition=condition_module.Everyone(),
                  writer=writer_module.SimpleWriter(),
                  handler=handler_module.NpzSerializerHandler(),
-                 filename='snapshot_iter_{.updater.iteration}',
-                 trigger=(1, 'epoch'),
-                 priority=-100):
+                 filename='snapshot_iter_{.updater.iteration}'):
         self._target = target
         if comm is not None:
             self._filename = filename + '_{}'.format(comm.rank)
@@ -22,8 +35,6 @@ class Snapshot(extension.Extension):
         self.condition = condition
         self.writer = writer
         self.handler = handler
-        self.trigger = trigger
-        self.priority = priority
 
     def __call__(self, trainer):
         if self.condition(trainer, self):
