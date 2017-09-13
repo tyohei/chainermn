@@ -7,6 +7,7 @@ class Snapshot(extension.Extension):
 
     def __init__(self,
                  target=None,
+                 comm=None,
                  condition=condition_module.Everyone(),
                  writer=writer_module.SimpleWriter(),
                  handler=handler_module.NpzSerializerHandler(),
@@ -14,8 +15,8 @@ class Snapshot(extension.Extension):
                  trigger=(1, 'epoch'),
                  priority=-100):
         self._target = target
-        if callable(filename):
-            self._filename = filename()
+        if comm is not None:
+            self._filename = filename + '_{}'.format(comm.rank)
         else:
             self._filename = filename
         self.condition = condition
