@@ -40,3 +40,10 @@ class SnapshotTask(object):
 
     def __call__(self):
         snapshot(self._filename, self._outdir, self._handler)
+
+
+def generate_filename(comm=None, filename='snapshot_iter_{.updater.iteration}'):
+    if comm is None:
+        return filename
+    else:
+        return filename + '_{}'.comm.rank

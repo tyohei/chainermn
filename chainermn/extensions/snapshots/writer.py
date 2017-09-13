@@ -9,9 +9,6 @@ class Writer(object):
     def __init__(self):
         pass
 
-    def initialize(self, snapshot, trainer):
-        pass
-
     def write(self, filename, outdir, handler):
         pass
 
@@ -53,12 +50,9 @@ class ProcessWriter(Writer):
 class QueueThreadWriter(Writer):
     
     def __init__(self, func=util.snapshot_consumer, task=util.SnapshotTask):
-        self._func = func
         self._task = task
-
-    def initialize(self, snapshot, trainer):
         self._queue = queue.Queue()
-        self._consumer = threading.Thread(target=self._func,
+        self._consumer = threading.Thread(target=func,
                                           args=(self._queue,))
         self._consumer.start()
 
@@ -74,13 +68,11 @@ class QueueThreadWriter(Writer):
 class QueueProcessWriter(Writer):
     
     def __init__(self, func=util.snapshot_consumer, task=util.SnapshotTask):
-        self._func = func
         self._task = task
-
-    def initialize(self, snapshot, trainer):
         self._queue = multiprocessing.JoinableQueue()
-        self._consumer = multiprocessing.Process(target=self._func,
-                                                 args=(self._queue,))
+        self._consumer = multiprocessing.Process(target=func,
+                                                 args=(self._queue,),
+                                                 daemon=True)
         self._consumer.start()
 
     def write(self, filename, outdir, handler):

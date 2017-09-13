@@ -14,7 +14,10 @@ class Snapshot(extension.Extension):
                  trigger=(1, 'epoch'),
                  priority=-100):
         self._target = target
-        self._filename = filename
+        if callable(filename):
+            self._filename = filename()
+        else:
+            self._filename = filename
         self.condition = condition
         self.writer = writer
         self.handler = handler
@@ -28,10 +31,6 @@ class Snapshot(extension.Extension):
             filename = self._filename.format(trainer)
             outdir = trainer.out
             self.writer.write(filename, outdir, self.handler)
-
-    def initialize(self, trainer):
-        if hasattr(self.writer, 'initialize'):
-            self.writer.initialize(self, trainer)
 
     def finalize(self):
         if hasattr(self.writer, 'finalize'):
